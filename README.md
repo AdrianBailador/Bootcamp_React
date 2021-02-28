@@ -1,2 +1,2 @@
-# Rendering a collection, modules. Bootcam 🚀🔯
-Created with CodeSandbox
+# Bootcam 🚀🔯
+Rendering a collection, modules. Bootcam 🚀🔯

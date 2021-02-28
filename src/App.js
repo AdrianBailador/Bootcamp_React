@@ -21,23 +21,34 @@ const notes = [
   }
 ];
 
+const Note = ({ id, content, date }) => {
+  return (
+    <li>
+      <p>
+        <strong>{content}</strong>
+      </p>
+      <small>
+        <time>{date}</time>
+      </small>
+    </li>
+  );
+};
+
 export default function App() {
   if (typeof notes === "undefined" || notes.length === 0) {
     return "No tenemos notas que mostrar";
   }
 
   return (
-    <div>
+    <ol>
       {notes.map((note) => (
-        <li key={note.id}>
-          <p>
-            <strong>{note.id}</strong>{" "}
-          </p>
-          <small>
-            <time>{note.date}</time>
-          </small>
-        </li>
+        <Note
+          key={note.id}
+          id={note.id}
+          content={note.content}
+          date={note.date}
+        />
       ))}
-    </div>
+    </ol>
   );
 }

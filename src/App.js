@@ -1,11 +1,42 @@
 import "./styles.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Note } from "./Note.js";
+import { getAllNotes } from "./services/notes/getAllNotes";
+import { createNote } from "./services/notes/createNote";
 
-export default function App(props) {
-  const [notes, setNotes] = useState(props.notes);
+export default function App() {
+  const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
-  const [showAll, setShowAll] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  /*  FORMA MAS SENCILLA, MAS RAPIDA, NO ES UNA DEPENDENCIA
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      fetch("https://jsonplaceholder.typicode.com/posts")
+        .then((response) => response.json())
+        .then((json) => {
+          setNotes(json);
+          setLoading(false);
+        });
+    }, 2000);
+  }, [newNote]);
+  */
+  useEffect(() => {
+    setLoading(true);
+    getAllNotes().then((notes) => {
+      setNotes(notes);
+      setLoading(false);
+    });
+  }, []);
+
+  /*
+  fetch("https://jsonplaceholder.typicode.com/posts") //Peticion asincrona
+    .then((response) => response.json())
+    .then((json) => {
+      console.log(json);
+    });
+    */
 
   const handleChange = (event) => {
     setNewNote(event.target.value);
@@ -14,48 +45,42 @@ export default function App(props) {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log("crear nota");
-    console.log(newNote);
+    //console.log(newNote);
     const noteToAddToState = {
-      id: notes.length + 1,
-      content: newNote,
-      date: new Date().toISOString(),
-      important: Math.random() < 0.5
+      //id: notes.length + 1,
+      title: newNote,
+      body: newNote,
+      userId: 1
     };
-    console.log(noteToAddToState);
+    //console.log(noteToAddToState);
 
+    createNote(noteToAddToState).then((newNote) => {
+      setNotes((prevNotes) => prevNotes.concat(newNote));
+    });
+
+    /* axios
+      .post("https://jsonplaceholder.typicode.com/posts", noteToAddToState)
+      .then((response) => {
+        const { data } = response;
+        setNotes((prevNotes) => prevNotes.concat(data));
+      });*/
     //setNotes(notes.concat(noteToAddToState));
-    setNotes([...notes, noteToAddToState]); //Esta es una forma mucho mas comoda
+    //setNotes([...notes, noteToAddToState]); //Esta es una forma mucho mas comoda
     setNewNote("");
   };
 
-  const handleShowAll = () => {
-    setShowAll(() => !showAll);
-  };
-
-  if (typeof notes === "undefined" || notes.length === 0) {
-    return "No tenemos notas que mostrar";
-  }
+  console.log("render");
+  //if (notes.length === 0) return "Hola MIBOOTCAMP!";
 
   return (
     <div>
       <h1>Notes</h1>
-      <button onClick={handleShowAll}>
-        {showAll ? "Show only important" : "Show All"}
-      </button>
+      {loading ? "Cargando..." : ""}
+
       <ol>
-        {notes
-          .filter((note) => {
-            if (showAll === true) return note;
-            return note.important === true;
-          })
-          .map((note) => (
-            <Note
-              key={note.id}
-              id={note.id}
-              content={note.content}
-              date={note.date}
-            />
-          ))}
+        {notes.map((note) => (
+          <Note key={note.id} {...note} />
+        ))}
       </ol>
       <form onSubmit={handleSubmit}>
         <input type="text" onChange={handleChange} value={newNote} />
